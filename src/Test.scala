@@ -4,11 +4,12 @@ object Graph {
   val side = Set('A', 'B', 'C', 'E', 'H', 'I', 'G')
   val bottomTop = Set('A', 'C', 'D', 'E', 'I', 'G', 'F')
 
-  val legalRoutes= Map(
-    'D'->Set('A','B'),
-    'F'->Set('C','I'),
-    'H'->Set('G','I'),
-    'E'->Set('A','I','G','C')
+  val legalRoutes = Map(
+    'D' -> Set(Set('A', 'G')),
+    'B' -> Set(Set('A', 'C')),
+    'F' -> Set(Set('C', 'I')),
+    'H' -> Set(Set('G', 'I')),
+    'E' -> Set(Set('B', 'H'), Set('D', 'F'), Set('A', 'I'), Set('G', 'C'))
   )
 
   val graph2 = Map(
@@ -30,17 +31,22 @@ object Graph {
 
       val currentPoint = possibleNextMovements.head
       val movement: List[Char] = currentMovements :+ currentPoint;
-      val newRoutes:Set[Char] = legalRoutes
-        .filter((t)=> t._2.contains(currentPoint) && movement.contains(t._1))
+      val newRoutes: Set[Char] = legalRoutes
+        .mapValues(_.filter(pair => pair.contains(currentPoint)))
+        .filter((t) => !t._2.isEmpty && movement.contains(t._1))
         .values
         .flatten
+        .flatten
         .toSet
+
+      // println(s"\nCurrent point ${currentPoint}\n New routes ${newRoutes} \n")
 
       val nextMovements: Set[Char] = (graph2
         .get(currentPoint).get ++ newRoutes)
         .filter(el => !(movement :+ startingPoint).contains(el))
 
       if (movement.length == length) {
+        println(movement)
         return moveInGraph(possibleNextMovements.tail, currentMovements, solutions + 1)
       }
 
